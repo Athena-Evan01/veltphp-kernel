@@ -31,4 +31,4 @@ Exclus :
 - [Issue 01 - Initialiser le package Kernel](issues/01-initialiser-package-kernel.md)
 - [Issue 02 - Creer les contrats fondamentaux](issues/02-creer-contrats-fondamentaux.md)
 - [Issue 03 - Implementer le container minimal](issues/03-implementer-container-minimal.md)
-
+- [Issue 04 - Ajouter configuration et bootstrap application](issues/04-ajouter-configuration-bootstrap-application.md)
