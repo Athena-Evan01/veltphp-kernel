@@ -209,6 +209,7 @@ Le container constitue le cœur du runtime Velt.
 
 Tous les futurs modules du framework (HTTP, CLI, UI, Database, Preview, Events, Config) utiliseront ce container pour communiquer et résoudre leurs dépendances.
 
+
 ### Objectif du container
 
 Le container Velt a pour rôle de :
@@ -225,27 +226,31 @@ Le container actuel est volontairement minimaliste afin de rester :
 - testable ;
 - indépendant des autres modules.
 
+
 ### Fonctionnalités disponibles
 
 Le container supporte actuellement :
 
-| Méthode       | Rôle                              |
-| ------------- | --------------------------------- |
-| `bind()`      | Enregistre un service             |
-| `singleton()` | Enregistre un service partagé     |
-| `instance()`  | Enregistre une instance existante |
-| `get()`       | Résout un service                 |
-| `has()`       | Vérifie l’existence d’un service  |
+| Méthode | Rôle |
+|---|---|
+| `bind()` | Enregistre un service |
+| `singleton()` | Enregistre un service partagé |
+| `instance()` | Enregistre une instance existante |
+| `get()` | Résout un service |
+| `has()` | Vérifie l’existence d’un service |
+
 
 ### Fonctionnement interne
 
 Le container repose sur trois registres internes :
 
-| Registre      | Rôle                                 |
-| ------------- | ------------------------------------ |
-| `$bindings`   | Stocke les resolvers des services    |
-| `$instances`  | Stocke les instances déjà résolues   |
+| Registre | Rôle |
+|---|---|
+| `$bindings` | Stocke les resolvers des services |
+| `$instances` | Stocke les instances déjà résolues |
 | `$singletons` | Indique quels services sont partagés |
+
+
 
 ### Exemples d’utilisation
 
@@ -262,7 +267,15 @@ $container->bind(
 );
 
 $config = $container->get('config');
+$container->singleton(
+    'app',
+    fn () => new Application()
+);
+```
 
+#### 2. Enregistrer un singleton
+
+```php
 $container->singleton(
     'app',
     fn () => new Application()
@@ -274,7 +287,96 @@ $app2 = $container->get('app');
 var_dump($app1 === $app2); // true
 ```
 
+#### 3. Enregistrer une instance existante
+
+```php
+$app = new Application();
+
+$container->instance('app', $app);
+
+$resolved = $container->get('app');
+```
+
 ---
+
+## La gestion d'erreur
+
+Si un service demandé n’existe pas, le container lance :
+
+```php
+
+Velt\Kernel\Exceptions\ServiceNotFoundException
+
+```
+
+## 10. Application Runtime et Bootstrap
+
+Le Kernel fournit une classe `Application` représentant le runtime principal de Velt.
+
+Cette classe centralise :
+
+- le chemin racine du projet ;
+- le container de services ;
+- la configuration ;
+- l’environnement courant ;
+- les bindings système de base.
+
+---
+
+### Création d’une application
+
+```php
+use Velt\Kernel\Application;
+
+$app = new Application(
+    basePath: __DIR__,
+    config: [
+        'app' => [
+            'name' => 'Velt',
+            'env' => 'local',
+        ],
+    ]
+);
+```
+
+### Base path
+
+Le chemin racine de l’application est accessible via :
+
+```php
+
+$app->basePath();
+
+```
+
+### Configuration
+
+Le runtime expose un repository de configuration :
+
+```php
+
+$config = $app->config();
+
+```
+
+Lecture :
+
+```php
+
+$config->get('app.name');
+
+
+```
+
+Valeur par défaut :
+
+```php
+
+$config->get('app.timezone', 'UTC');
+
+```
+
+----
 
 ## Ce que le Kernel ne fait PAS
 
@@ -315,7 +417,6 @@ Les dépendances suivantes sont interdites dans le Kernel :
 ## Installation (future)
 
 Le Kernel sera installé via Composer dans un projet Velt :
-
 ```bash
 composer require velt/kernel
 ```
