@@ -376,7 +376,7 @@ $config->get('app.timezone', 'UTC');
 
 ```
 
----
+----
 
 ## Ce que le Kernel ne fait PAS
 
