@@ -481,6 +481,85 @@ boot()
 
 ---
 
+## 11. EventDispatcher (synchrone interne)
+
+Le Kernel intègre désormais un système d’événements synchrone minimal permettant la communication interne entre composants du framework.
+
+Ce système n’est pas le système d’événements applicatif complet (qui sera introduit plus tard). Il est exclusivement destiné aux hooks internes du cycle de vie du Kernel.
+
+### Role 
+
+Le dispatcher permet de :
+```bash
+- enregistrer des listeners sur des événements ;
+- déclencher des événements synchrones ;
+- exécuter plusieurs listeners pour un même événement ;
+- garantir un ordre d’exécution stable ;
+- propager les erreurs sans les masquer.
+```
+
+### Interface EventDispatcherInterface
+
+Le contrat expose deux méthodes principales :
+
+```php
+listen()
+```
+
+Permet d’enregistrer un listener sur un événement donné.
+
+```php
+listen(string $event, callable $listener): void
+```
+
+```php
+dispatch()
+```
+
+Déclenche un événement et exécute tous les listeners associés.
+
+```php
+dispatch(object|string $event, mixed $payload = null): array
+```
+
+### Comportement du dispatcher
+
+Le dispatcher garantit :
+
+- exécution synchrone immédiate ;
+- ordre d’exécution respecté (FIFO) ;
+- propagation des exceptions ;
+- absence de dépendances externes ;
+- simplicité maximale (pas de queue, async ou middleware).
+
+
+### Intégration dans le lifecycle
+
+Le EventDispatcher est maintenant intégré au Kernel et utilisé dans le cycle de vie de l’application.
+
+Événements internes du Kernel
+
+Le Kernel émet désormais les événements suivants :
+
+```php
+provider.registered
+application.booted
+```
+
+### Garanties du système
+
+Le EventDispatcher garantit :
+
+- aucun couplage avec HTTP, CLI, UI ou Database ;
+- exécution strictement synchrone ;
+- comportement déterministe ;
+- tests isolés sans dépendances externes.
+
+
+
+
+---
+
 ## Ce que le Kernel ne fait PAS
 
 Le Kernel ne doit jamais gérer :

@@ -9,6 +9,7 @@ use Velt\Kernel\Config\ConfigRepository;
 use Velt\Kernel\Contracts\ApplicationInterface;
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
 use Velt\Kernel\Contracts\ContainerInterface;
+use Velt\Kernel\Contracts\EventDispatcherInterface;
 use Velt\Kernel\Contracts\ServiceProviderInterface;
 
 final class Application implements ApplicationInterface
@@ -20,6 +21,8 @@ final class Application implements ApplicationInterface
     private ContainerInterface $container;
 
     private ConfigRepositoryInterface $config;
+
+    private EventDispatcherInterface $events;
 
     /**
      * Providers enregistrés.
@@ -46,6 +49,8 @@ final class Application implements ApplicationInterface
 
         $this->config = new ConfigRepository($config);
 
+        $this->events = new EventDispatcher();
+
         $this->registerBaseBindings();
     }
 
@@ -62,6 +67,11 @@ final class Application implements ApplicationInterface
     public function config(): ConfigRepositoryInterface
     {
         return $this->config;
+    }
+
+    public function events(): EventDispatcherInterface
+    {
+        return $this->events;
     }
 
     public function environment(): string
@@ -113,6 +123,11 @@ final class Application implements ApplicationInterface
 
         $this->providers[] = $provider;
 
+        $this->events->dispatch(
+            'provider.registered',
+            $provider
+        );
+
         return $provider;
     }
 
@@ -127,6 +142,8 @@ final class Application implements ApplicationInterface
         }
 
         $this->booted = true;
+
+        $this->events->dispatch('application.booted');
     }
 
     private function registerBaseBindings(): void
@@ -134,5 +151,7 @@ final class Application implements ApplicationInterface
         $this->container->instance('app', $this);
 
         $this->container->instance('config', $this->config);
+
+        $this->container->instance('events', $this->events);
     }
 }
