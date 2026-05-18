@@ -690,7 +690,9 @@ Le Kernel évite volontairement :
 les dumps automatiques ;
 l’exposition des secrets ;
 les traces complètes en production ;
-les dépendances HTTP.
+les dépendances HTTP...
+
+ksdgkisdufnks
 
 -----
 
