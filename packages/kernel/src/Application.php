@@ -7,11 +7,13 @@ namespace Velt\Kernel;
 use InvalidArgumentException;
 use Velt\Kernel\Env\EnvRepository;
 use Velt\Kernel\Config\ConfigRepository;
+use Velt\Kernel\Exceptions\DefaultExceptionHandler;
 use Velt\Kernel\Contracts\ApplicationInterface;
 use Velt\Kernel\Contracts\ConfigRepositoryInterface;
 use Velt\Kernel\Contracts\ContainerInterface;
 use Velt\Kernel\Contracts\EnvRepositoryInterface;
 use Velt\Kernel\Contracts\EventDispatcherInterface;
+use Velt\Kernel\Contracts\ExceptionHandlerInterface;
 use Velt\Kernel\Contracts\ServiceProviderInterface;
 
 final class Application implements ApplicationInterface
@@ -27,6 +29,8 @@ final class Application implements ApplicationInterface
     private EventDispatcherInterface $events;
 
     private EnvRepositoryInterface $env;
+
+    private ExceptionHandlerInterface $exceptions;
 
     /**
      * Providers enregistrés.
@@ -64,6 +68,10 @@ final class Application implements ApplicationInterface
 
         $this->loadEnvironment();
 
+        $this->exceptions = new DefaultExceptionHandler(
+            $this->isDebug()
+        );
+
         $this->registerBaseBindings();
     }
 
@@ -90,6 +98,11 @@ final class Application implements ApplicationInterface
     public function env(): EnvRepositoryInterface
     {
         return $this->env;
+    }
+
+    public function exceptions(): ExceptionHandlerInterface
+    {
+        return $this->exceptions;
     }
 
     public function environment(): string
@@ -197,6 +210,11 @@ final class Application implements ApplicationInterface
         $this->container->instance(
             'env',
             $this->env
+        );
+
+        $this->container->instance(
+            'exceptions',
+            $this->exceptions
         );
     }
 

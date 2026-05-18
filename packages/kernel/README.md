@@ -617,7 +617,81 @@ Les valeurs suivantes sont automatiquement converties :
 | `empty`       | `''`          |
 
 -----
------
+
+## 13. Gestion centralisée des exceptions
+
+Le Kernel intègre un système minimal de gestion centralisée des exceptions.
+
+Ce composant permet :
+
+- de reporter les erreurs ;
+- de transformer les exceptions en structure exploitable ;
+- de différencier les comportements debug et production ;
+- de préparer l’intégration HTTP, CLI et Preview.
+
+
+### Philosophie
+
+Le Kernel ne génère pas directement :
+
+- de réponse HTTP ;
+- de page HTML ;
+- de JSON API ;
+- de sortie terminal.
+
+Le handler retourne uniquement une structure d’erreur neutre.
+
+Les autres modules Velt seront responsables du rendu final :
+
+| Module | Transformation |
+|---|---|
+| HTTP | HTML / JSON |
+| CLI | sortie terminal |
+| Preview | overlay debug |
+| Mobile | écran erreur |
+
+
+### ExceptionHandlerInterface
+
+Le contrat principal :
+
+```php
+use Throwable;
+
+interface ExceptionHandlerInterface
+{
+    public function report(Throwable $exception): void;
+
+    public function render(
+        Throwable $exception,
+        mixed $context = null
+    ): array;
+}
+```
+
+### Handler par défaut
+
+Le Kernel fournit :
+
+```php
+Velt\Kernel\Exceptions\DefaultExceptionHandler
+```
+
+Ce handler :
+
+- reporte les erreurs via error_log
+- protège les informations sensibles
+- expose les détails uniquement en mode debug
+
+### Sécurité
+
+Le Kernel évite volontairement :
+
+les dumps automatiques ;
+l’exposition des secrets ;
+les traces complètes en production ;
+les dépendances HTTP...
+
 -----
 
 ## Ce que le Kernel ne fait PAS
@@ -721,3 +795,6 @@ Le Kernel est considéré comme valide si :
  - aucune dépendance vers d’autres modules Velt
  - le Kernel fonctionne en isolation totale
 ```
+
+
+SEM - KASANGA
