@@ -616,7 +616,9 @@ Les valeurs suivantes sont automatiquement converties :
 | `null`        | `null`        |
 | `empty`       | `''`          |
 
----
+-----
+-----
+-----
 
 ## Ce que le Kernel ne fait PAS
 
