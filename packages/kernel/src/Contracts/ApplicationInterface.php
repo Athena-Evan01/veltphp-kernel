@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Velt\Kernel\Contracts;
 
-/**
- * Représente l'application Velt en cours d'exécution.
- */
 interface ApplicationInterface
 {
     /**
-     * Retourne le chemin racine du projet.
+     * Retourne le chemin racine de l'application.
      */
     public function basePath(): string;
 
     /**
-     * Retourne le container de services.
+     * Retourne le container principal.
      */
     public function container(): ContainerInterface;
 
@@ -25,27 +22,54 @@ interface ApplicationInterface
     public function config(): ConfigRepositoryInterface;
 
     /**
+     * Retourne le dispatcher d'événements.
+     */
+    public function events(): EventDispatcherInterface;
+
+    /**
+     * Retourne le repository d'environnement.
+     */
+    public function env(): EnvRepositoryInterface;
+
+    /**
+     * Retourne le handler d'exceptions.
+     */
+    public function exceptions(): ExceptionHandlerInterface;
+
+    /**
      * Retourne l'environnement courant.
-     *
-     * Exemple :
-     * - local
-     * - testing
-     * - production
      */
     public function environment(): string;
 
     /**
-     * Vérifie si l'application est en environnement local.
+     * Vérifie si l'application est en mode local.
      */
     public function isLocal(): bool;
 
     /**
-     * Vérifie si l'application est en environnement de production.
+     * Vérifie si l'application est en mode testing.
+     */
+    public function isTesting(): bool;
+
+    /**
+     * Vérifie si l'application est en mode production.
      */
     public function isProduction(): bool;
 
     /**
-     * Vérifie si l'application est en environnement de test.
+     * Vérifie si le mode debug est actif.
      */
-    public function isTesting(): bool;
+    public function isDebug(): bool;
+
+    /**
+     * Enregistre un provider.
+     */
+    public function registerProvider(
+        string|ServiceProviderInterface $provider
+    ): ServiceProviderInterface;
+
+    /**
+     * Boot tous les providers.
+     */
+    public function boot(): void;
 }

@@ -8,50 +8,105 @@ use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionParameter;
 use Velt\Kernel\Contracts\ContainerInterface;
-use Velt\Kernel\Exceptions\ServiceNotFoundException;
 use Velt\Kernel\Exceptions\ContainerResolutionException;
+use Velt\Kernel\Exceptions\ServiceNotFoundException;
 
 final class Container implements ContainerInterface
 {
+    /**
+     * Services enregistrés.
+     *
+     * @var array<string, mixed>
+     */
     private array $bindings = [];
+
+    /**
+     * Instances singleton résolues.
+     *
+     * @var array<string, object>
+     */
     private array $instances = [];
+
+    /**
+     * Services marqués comme singleton.
+     *
+     * @var array<string, bool>
+     */
     private array $singletons = [];
 
-    public function bind(string $id, callable|string $resolver): void
-    {
+    /**
+     * Aliases de services.
+     *
+     * @var array<string, string>
+     */
+    private array $aliases = [];
+
+    public function bind(
+        string $id,
+        callable|string $resolver
+    ): void {
         $this->bindings[$id] = $resolver;
     }
 
-    public function singleton(string $id, callable|string $resolver): void
-    {
+    public function singleton(
+        string $id,
+        callable|string $resolver
+    ): void {
         $this->singletons[$id] = true;
+
         $this->bindings[$id] = $resolver;
     }
 
-    public function instance(string $id, object $instance): void
-    {
+    public function instance(
+        string $id,
+        object $instance
+    ): void {
         $this->instances[$id] = $instance;
+
         $this->bindings[$id] = $instance;
+
         $this->singletons[$id] = true;
+    }
+
+    public function alias(
+        string $abstract,
+        string $alias
+    ): void {
+        $this->aliases[$alias] = $abstract;
     }
 
     public function has(string $id): bool
     {
         $id = $this->aliases[$id] ?? $id;
 
-        return isset($this->bindings[$id])
-            || isset($this->instances[$id])
-            || class_exists($id);
+        if (
+            isset($this->bindings[$id]) ||
+            isset($this->instances[$id])
+        ) {
+            return true;
+        }
+
+        return class_exists($id);
     }
 
     public function get(string $id): mixed
     {
+        $id = $this->aliases[$id] ?? $id;
+
+        /**
+         * Instance singleton déjà résolue.
+         */
         if (isset($this->instances[$id])) {
             return $this->instances[$id];
         }
 
+        /**
+         * Service explicitement bindé.
+         */
         if (isset($this->bindings[$id])) {
-            $service = $this->resolve($this->bindings[$id]);
+            $service = $this->resolve(
+                $this->bindings[$id]
+            );
 
             if (isset($this->singletons[$id])) {
                 $this->instances[$id] = $service;
@@ -60,21 +115,33 @@ final class Container implements ContainerInterface
             return $service;
         }
 
+        /**
+         * Autowiring classe concrète.
+         */
         if (class_exists($id)) {
             return $this->build($id);
         }
 
-        throw new ServiceNotFoundException("Service not found: {$id}");
+        throw new ServiceNotFoundException(
+            "Service not found: {$id}"
+        );
     }
 
-    private function resolve(callable|string $resolver): mixed
-    {
+    private function resolve(
+        callable|string $resolver
+    ): mixed {
         if (is_callable($resolver)) {
             return $resolver($this);
         }
 
-        if (class_exists($resolver)) {
-            return $this->build($resolver);
+        if (is_string($resolver)) {
+            if (class_exists($resolver)) {
+                return $this->build($resolver);
+            }
+
+            throw new ContainerResolutionException(
+                "Unable to resolve service [{$resolver}]."
+            );
         }
 
         return $resolver;
@@ -98,15 +165,25 @@ final class Container implements ContainerInterface
 
         $dependencies = [];
 
-        foreach ($constructor->getParameters() as $parameter) {
-            $dependencies[] = $this->resolveParameter($class, $parameter);
+        foreach (
+            $constructor->getParameters()
+            as $parameter
+        ) {
+            $dependencies[] = $this->resolveParameter(
+                $class,
+                $parameter
+            );
         }
 
-        return $reflection->newInstanceArgs($dependencies);
+        return $reflection->newInstanceArgs(
+            $dependencies
+        );
     }
 
-    private function resolveParameter(string $class, ReflectionParameter $parameter): mixed
-    {
+    private function resolveParameter(
+        string $class,
+        ReflectionParameter $parameter
+    ): mixed {
         $type = $parameter->getType();
 
         if (! $type instanceof ReflectionNamedType) {
@@ -121,6 +198,8 @@ final class Container implements ContainerInterface
             );
         }
 
-        return $this->get($type->getName());
+        return $this->get(
+            $type->getName()
+        );
     }
 }
