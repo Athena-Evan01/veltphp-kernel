@@ -14,19 +14,36 @@ interface ContainerInterface
      *
      * @param callable|string $resolver
      */
-    public function bind(string $id, callable|string $resolver): void;
+    public function bind(
+        string $id,
+        callable|string $resolver
+    ): void;
 
     /**
      * Lie un singleton dans le container.
      *
      * @param callable|string $resolver
      */
-    public function singleton(string $id, callable|string $resolver): void;
+    public function singleton(
+        string $id,
+        callable|string $resolver
+    ): void;
 
     /**
      * Enregistre une instance existante.
      */
-    public function instance(string $id, object $instance): void;
+    public function instance(
+        string $id,
+        object $instance
+    ): void;
+
+    /**
+     * Crée un alias vers un service.
+     */
+    public function alias(
+        string $abstract,
+        string $alias
+    ): void;
 
     /**
      * Vérifie si un service existe.

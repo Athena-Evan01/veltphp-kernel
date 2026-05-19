@@ -9,15 +9,15 @@ use Velt\Kernel\Contracts\ApplicationInterface;
 use Velt\Kernel\Tests\Fixtures\FakeApplication;
 use Velt\Kernel\Tests\Fixtures\FakeConfigRepository;
 use Velt\Kernel\Tests\Fixtures\FakeContainer;
+use Velt\Kernel\Tests\Fixtures\FakeEnvRepository;
+use Velt\Kernel\Tests\Fixtures\FakeEventDispatcher;
+use Velt\Kernel\Tests\Fixtures\FakeExceptionHandler;
 
 final class ApplicationInterfaceTest extends TestCase
 {
     public function test_fake_implements_application_contract(): void
     {
-        $app = new FakeApplication(
-            new FakeContainer(),
-            new FakeConfigRepository(),
-        );
+        $app = $this->createApplication();
 
         $this->assertInstanceOf(
             ApplicationInterface::class,
@@ -27,10 +27,7 @@ final class ApplicationInterfaceTest extends TestCase
 
     public function test_it_returns_base_path(): void
     {
-        $app = new FakeApplication(
-            new FakeContainer(),
-            new FakeConfigRepository(),
-        );
+        $app = $this->createApplication();
 
         $this->assertSame(
             '/velt',
@@ -45,6 +42,9 @@ final class ApplicationInterfaceTest extends TestCase
         $app = new FakeApplication(
             $container,
             new FakeConfigRepository(),
+            new FakeEventDispatcher(),
+            new FakeEnvRepository(),
+            new FakeExceptionHandler(),
         );
 
         $this->assertSame(
@@ -60,6 +60,9 @@ final class ApplicationInterfaceTest extends TestCase
         $app = new FakeApplication(
             new FakeContainer(),
             $config,
+            new FakeEventDispatcher(),
+            new FakeEnvRepository(),
+            new FakeExceptionHandler(),
         );
 
         $this->assertSame(
@@ -70,10 +73,7 @@ final class ApplicationInterfaceTest extends TestCase
 
     public function test_it_returns_environment(): void
     {
-        $app = new FakeApplication(
-            new FakeContainer(),
-            new FakeConfigRepository(),
-        );
+        $app = $this->createApplication();
 
         $this->assertSame(
             'local',
@@ -83,10 +83,7 @@ final class ApplicationInterfaceTest extends TestCase
 
     public function test_it_detects_local_environment(): void
     {
-        $app = new FakeApplication(
-            new FakeContainer(),
-            new FakeConfigRepository(),
-        );
+        $app = $this->createApplication();
 
         $this->assertTrue(
             $app->isLocal()
@@ -95,10 +92,7 @@ final class ApplicationInterfaceTest extends TestCase
 
     public function test_it_detects_non_production_environment(): void
     {
-        $app = new FakeApplication(
-            new FakeContainer(),
-            new FakeConfigRepository(),
-        );
+        $app = $this->createApplication();
 
         $this->assertFalse(
             $app->isProduction()
@@ -107,13 +101,21 @@ final class ApplicationInterfaceTest extends TestCase
 
     public function test_it_detects_non_testing_environment(): void
     {
-        $app = new FakeApplication(
-            new FakeContainer(),
-            new FakeConfigRepository(),
-        );
+        $app = $this->createApplication();
 
         $this->assertFalse(
             $app->isTesting()
+        );
+    }
+
+    private function createApplication(): FakeApplication
+    {
+        return new FakeApplication(
+            new FakeContainer(),
+            new FakeConfigRepository(),
+            new FakeEventDispatcher(),
+            new FakeEnvRepository(),
+            new FakeExceptionHandler(),
         );
     }
 }
