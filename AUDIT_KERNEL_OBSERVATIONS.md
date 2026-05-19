@@ -232,3 +232,6 @@ Le vrai critere est:
 - les erreurs sont explicites;
 - les modules futurs peuvent s'appuyer dessus sans contournement;
 - aucune couche HTTP/CLI n'entre par accident dans le kernel.
+
+
+faut arranger
