@@ -224,6 +224,10 @@ Tests cover container resolution, lifecycle state, providers, configuration, env
 
 Kernel changes affect every Velt package. Public contract changes require tests, an upgrade note and integration evidence. New runtime-specific behavior should live behind a portable contract and be implemented in the owning adapter repository.
 
+## Contributors
+
+- Sem kasanga Kisamu : [github : https://github.com/semkasanga / linkedin : https://www.linkedin.com/in/sem-kasanga-81b876293?utm_source=share_via&utm_content=profile&utm_medium=member_ios] : Maintains and create the module
+
 ## License
 
 MIT
